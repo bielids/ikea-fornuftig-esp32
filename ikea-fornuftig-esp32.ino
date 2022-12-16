@@ -2,24 +2,24 @@
 
 WiFiServer server(80);
 
-const int rightOne = 4;
-const int rightTwo = 0;
-const int rightThree = 2;
+const int fanLow = 4;
+const int fanMed = 0;
+const int fanHigh = 2;
 
-const int middleOne = 19;
-const int middleTwo = 18;
+const int inputLow = 23;
+const int inputMed = 19;
+const int inputHigh = 18;
 
-const int leftOne = 23;
-const int leftTwo = 22;
+const int inWeb = 22;
 
 // State of the push button
-int r1s = 0;
-int r2s = 0;
-int r3s = 0;
-int m1s = 0;
-int m2s = 0;
-int l1s = 0;
-int l2s = 0;
+// int r1s = 0;
+// int r2s = 0;
+// int r3s = 0;
+int inMedState = 0;
+int inHighState = 0;
+int inLowState = 0;
+int inWebState = 0;
 
 
 const char* ssid = "Viscara";
@@ -43,51 +43,28 @@ void setup(){
     Serial.println(WiFi.localIP());
 
     //Set the pin as an input pullup
-    pinMode(rightOne, OUTPUT);
-    pinMode(rightTwo, OUTPUT);
-    pinMode(rightThree, OUTPUT);
-    pinMode(middleOne, INPUT_PULLUP);
-    pinMode(middleTwo, INPUT_PULLUP);
-    pinMode(leftOne, INPUT_PULLUP);
-    pinMode(leftTwo, INPUT_PULLUP);
-/*    pinMode(ledPin, OUTPUT) */
+    pinMode(fanLow, OUTPUT);
+    pinMode(fanMed, OUTPUT);
+    pinMode(fanHigh, OUTPUT);
+    pinMode(inputMed, INPUT_PULLUP);
+    pinMode(inputHigh, INPUT_PULLUP);
+    pinMode(inputLow, INPUT_PULLUP);
+    pinMode(inWeb, INPUT_PULLUP);
 }
 
 void loop() {
 
-//    digitalWrite(rightOne, HIGH);
-/*    r1s = digitalRead(rightOne);
-    Serial.println("right 1 state: ");
-    Serial.println(r1s);
-*/
-//     digitalWrite(rightTwo, HIGH);
-/*    r2s = digitalRead(rightTwo);
-    Serial.println("right 2 state: ");
-    Serial.println(r2s);
-*/
-//    digitalWrite(rightThree, HIGH);
-/*    r3s = digitalRead(rightThree);
-    Serial.println("right 3 state: ");
-    Serial.println(r3s);
-*/    
+    inMedState = digitalRead(inputMed);
+    inHighState = digitalRead(inputHigh);
+    inLowState = digitalRead(inputLow);
+    inWebState = digitalRead(inWeb);
 
-/*
- * l1 loq
- * m1 mid 
- * m2 high
- * l2 off
- */
-
-    m1s = digitalRead(middleOne);
-    m2s = digitalRead(middleTwo);
-    l1s = digitalRead(leftOne);
-    l2s = digitalRead(leftTwo);
-
-    while (!l2s) {
+    while (!inWebState) {
       Serial.println("Broke out of while loop");
       WiFiClient client = server.available();
+// do nothing if no client is found 
       if (!client) {
-      return;
+          return;
       }
 
       Serial.println('Found client');
@@ -103,33 +80,33 @@ void loop() {
   
       if (request.indexOf("/LED=OFF") != -1) 
       {
-        digitalWrite(rightOne, LOW);
-        digitalWrite(rightTwo, LOW);
-        digitalWrite(rightThree, LOW);
+        digitalWrite(fanLow, LOW);
+        digitalWrite(fanMed, LOW);
+        digitalWrite(fanHigh, LOW);
         value = 2;
       } 
   
       if (request.indexOf("/LED=LOW") != -1) 
       {
-        digitalWrite(rightOne, HIGH);
-        digitalWrite(rightTwo, LOW);
-        digitalWrite(rightThree, LOW);
+        digitalWrite(fanLow, HIGH);
+        digitalWrite(fanMed, LOW);
+        digitalWrite(fanHigh, LOW);
         value = 2;
       } 
   
       if (request.indexOf("/LED=MED") != -1) 
       {
-        digitalWrite(rightOne, LOW);
-        digitalWrite(rightTwo, HIGH);
-        digitalWrite(rightThree, LOW);
+        digitalWrite(fanLow, LOW);
+        digitalWrite(fanMed, HIGH);
+        digitalWrite(fanHigh, LOW);
         value = 2;
       } 
       
       if (request.indexOf("/LED=HIGH") != -1) 
       {
-        digitalWrite(rightOne, LOW);
-        digitalWrite(rightTwo, LOW);
-        digitalWrite(rightThree, HIGH);
+        digitalWrite(fanLow, LOW);
+        digitalWrite(fanMed, LOW);
+        digitalWrite(fanHigh, HIGH);
         value = 2;
       } 
     
@@ -155,64 +132,44 @@ void loop() {
       client.println("</html>");
     
       Serial.println("");
+      delay(100);
     }
+
     Serial.println("Not off, checking input vals");
 
-    m1s = digitalRead(middleOne);
-    m2s = digitalRead(middleTwo);
-    l1s = digitalRead(leftOne);
-    l2s = digitalRead(leftTwo);
+    inMedState = digitalRead(inputMed);
+    inHighState = digitalRead(inputHigh);
+    inLowState = digitalRead(inputLow);
+    inWebState = digitalRead(inWeb);
 
-    Serial.println(l1s);
-    Serial.println(m1s);
-    Serial.println(m2s);
+    Serial.println(inLowStat);
+    Serial.println(inMedStat);
+    Serial.println(inHighStat);
     delay(100);
 
-    if (m1s < 1) {
+    if (inMedState < 1) {
         Serial.println("MED SPEED");
-        digitalWrite(rightTwo, HIGH);
+        digitalWrite(fanMed, HIGH);
     } else {
-        digitalWrite(rightTwo, LOW);
+        digitalWrite(fanMed, LOW);
     }
     
     // 
-    if (l1s < 1) {
-        Serial.println("HIGH SPEED");
-        digitalWrite(rightThree, HIGH);
+    if (inLowState < 1) {
+        Serial.println("LOW SPEED");
+        digitalWrite(fanLow, HIGH);
     } else {
-        digitalWrite(rightThree, LOW);
+        digitalWrite(fanLow, LOW);
     }
 
    
-    if (m2s < 1) {
-          Serial.println("LOW SPEED");
-          digitalWrite(rightOne, HIGH);
+    if (inHighState < 1) {
+          Serial.println("HIGH SPEED");
+          digitalWrite(fanHigh, HIGH);
     } else {
-          digitalWrite(rightOne, LOW);
+          digitalWrite(fanHigh, LOW);
     }
     
-    l2s = digitalRead(leftTwo);
+    inWebState = digitalRead(inWeb);
     delay(100);
-
-
-//    Serial.println(" left 1 state: ");
-//    Serial.println(l1s);
-    
-//   
-
-//    Serial.println(" left 1 state: ");
-//    Serial.println(l2s);
-
-//    Serial.print('============================');
-
-    
-
-    delay(100);
-/*    if (buttonState == LOW) {
-        // Switch on the led
-        digitalWrite(ledPin, HIGH);
-    } else {
-        // Switch off the led
-        digitalWrite(ledPin, LOW);
-    }*/
 }
