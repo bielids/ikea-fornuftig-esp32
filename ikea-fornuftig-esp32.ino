@@ -43,6 +43,8 @@ void setup(){
     Serial.print("Local ESP32 IP: ");
     Serial.println(WiFi.localIP());
 
+    server.begin();
+
     //Set the pin as an input pullup
     pinMode(fanLow, OUTPUT);
     pinMode(fanMed, OUTPUT);
@@ -61,7 +63,15 @@ void loop() {
     inWebState = digitalRead(inWeb);
 
     while (!inWebState) {
-      Serial.println("In while loop");
+//      Serial.println("In while loop");
+      if (overrideVal == 0)
+      {
+        digitalWrite(fanLow, HIGH);
+        digitalWrite(fanMed, HIGH);
+        digitalWrite(fanHigh, HIGH);
+      }
+
+      overrideVal = 1;
       delay(300);
       WiFiClient client = server.available();
 // do nothing if no client is found 
@@ -80,35 +90,35 @@ void loop() {
   
       int value = 0;
   
-      if (request.indexOf("/LED=OFF") != -1) 
-      {
-        digitalWrite(fanLow, LOW);
-        digitalWrite(fanMed, LOW);
-        digitalWrite(fanHigh, LOW);
-        value = 2;
-      } 
-  
-      if (request.indexOf("/LED=LOW") != -1) 
+      if (request.indexOf("/FAN=OFF") != -1) 
       {
         digitalWrite(fanLow, HIGH);
-        digitalWrite(fanMed, LOW);
-        digitalWrite(fanHigh, LOW);
+        digitalWrite(fanMed, HIGH);
+        digitalWrite(fanHigh, HIGH);
         value = 2;
       } 
   
-      if (request.indexOf("/LED=MED") != -1) 
+      if (request.indexOf("/FAN=HIGH") != -1) 
       {
         digitalWrite(fanLow, LOW);
         digitalWrite(fanMed, HIGH);
-        digitalWrite(fanHigh, LOW);
+        digitalWrite(fanHigh, HIGH);
+        value = 2;
+      } 
+  
+      if (request.indexOf("/FAN=MED") != -1) 
+      {
+        digitalWrite(fanLow, HIGH);
+        digitalWrite(fanMed, LOW);
+        digitalWrite(fanHigh, HIGH);
         value = 2;
       } 
       
-      if (request.indexOf("/LED=HIGH") != -1) 
+      if (request.indexOf("/FAN=LOW") != -1) 
       {
-        digitalWrite(fanLow, LOW);
-        digitalWrite(fanMed, LOW);
-        digitalWrite(fanHigh, HIGH);
+        digitalWrite(fanLow, HIGH);
+        digitalWrite(fanMed, HIGH);
+        digitalWrite(fanHigh, LOW);
         value = 2;
       } 
     
@@ -118,9 +128,9 @@ void loop() {
     
       client.println("<!DOCTYPE HTML>");
       client.println("<html>");
-      client.print("LED status: "); 
+      client.print("FAN status: "); 
     
-      if(value == HIGH) 
+      if(value == LOW) 
       {
         client.print("ON");  
       } 
@@ -129,68 +139,50 @@ void loop() {
         client.print("OFF");
       }
       client.println("<br><br>");
-      client.println("Turn <a href=\"/LED=ON\">ON</a><br>");
-      client.println("Turn <a href=\"/LED=OFF\">OFF</a><br>");
+      client.println("Turn <a href=\"/FAN=ON\">ON</a><br>");
+      client.println("Turn <a href=\"/FAN=OFF\">OFF</a><br>");
       client.println("</html>");
     
-      Serial.println("");
+//      Serial.println("");
       delay(100);
     }
 
-    while (overrideVal > 0) {
-      Serial.println("Not off, checking input vals");
-  
-      inMedState = digitalRead(inputMed);
-      inHighState = digitalRead(inputHigh);
-      inLowState = digitalRead(inputLow);
-      inWebState = digitalRead(inWeb);
-  
-      Serial.println(inLowState);
-      Serial.println(inMedState);
-      Serial.println(inHighState);
-      delay(100);
-  
-      if (inMedState < 1) {
-          Serial.println("MED SPEED");
-          digitalWrite(fanMed, HIGH);
-      } else {
-          digitalWrite(fanMed, LOW);
-      }
-      
-      // 
-      if (inLowState < 1) {
-          Serial.println("LOW SPEED");
-          digitalWrite(fanLow, HIGH);
-      } else {
-          digitalWrite(fanLow, LOW);
-      }
-  
-     
-      if (inHighState < 1) {
-            Serial.println("HIGH SPEED");
-            digitalWrite(fanHigh, HIGH);
-      } else {
-            digitalWrite(fanHigh, LOW);
-      }
-      
-      inWebState = digitalRead(inWeb);
-      delay(100);
+//    Serial.println("Not off, checking input vals");
+    overrideVal = 0;
+
+    inMedState = digitalRead(inputMed);
+    inHighState = digitalRead(inputHigh);
+    inLowState = digitalRead(inputLow);
+    inWebState = digitalRead(inWeb);
+
+//    Serial.println(inLowState);
+//    Serial.println(inMedState);
+//    Serial.println(inHighState);
+    delay(100);
+
+    if (inMedState < 1) {
+//        Serial.println("MED SPEED");
+        digitalWrite(fanMed, LOW);
+    } else {
+        digitalWrite(fanMed, HIGH);
     }
-    Serial.println("DEBUG ENABLED");
-    delay(500);
-    Serial.println("Seting low speed");
-    digitalWrite(fanLow, HIGH);
-    digitalWrite(fanMed, LOW);
-    digitalWrite(fanHigh, LOW);
-    delay(10000);
-    Serial.println("Setting med speed");
-    digitalWrite(fanLow, LOW);
-    digitalWrite(fanMed, HIGH);
-    digitalWrite(fanHigh, LOW);
-    delay(10000);
-    Serial.println("Setting high speed");
-    digitalWrite(fanLow, LOW);
-    digitalWrite(fanMed, LOW);
-    digitalWrite(fanHigh, HIGH);
-    delay(10000);
+    
+    // 
+    if (inLowState < 1) {
+//        Serial.println("HIGH SPEED");
+        digitalWrite(fanLow, LOW);
+    } else {
+        digitalWrite(fanLow, HIGH);
+    }
+
+   
+    if (inHighState < 1) {
+//          Serial.println("LOW SPEED");
+          digitalWrite(fanHigh, LOW);
+    } else {
+          digitalWrite(fanHigh, HIGH);
+    }
+    
+    inWebState = digitalRead(inWeb);
+    delay(100);
 }
