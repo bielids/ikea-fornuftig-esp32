@@ -161,7 +161,7 @@ void loop() {
     delay(100);
 
     if (inMedState < 1) {
-//        Serial.println("MED SPEED");
+        Serial.println("MED SPEED");
         digitalWrite(fanMed, LOW);
     } else {
         digitalWrite(fanMed, HIGH);
@@ -169,7 +169,7 @@ void loop() {
     
     // 
     if (inLowState < 1) {
-//        Serial.println("HIGH SPEED");
+        Serial.println("HIGH SPEED");
         digitalWrite(fanLow, LOW);
     } else {
         digitalWrite(fanLow, HIGH);
@@ -177,7 +177,7 @@ void loop() {
 
    
     if (inHighState < 1) {
-//          Serial.println("LOW SPEED");
+          Serial.println("LOW SPEED");
           digitalWrite(fanHigh, LOW);
     } else {
           digitalWrite(fanHigh, HIGH);
